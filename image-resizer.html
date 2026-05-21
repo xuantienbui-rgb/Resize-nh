@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pinpoint Image Resizer — World-class quality</title>
+<script src="https://cdn.jsdelivr.net/npm/pica@9.0.1/dist/pica.min.js"></script>
+<style>
+  :root {
+    --pmax-blue: #0B5FFF;
+    --pmax-blue-dark: #0847C7;
+    --pmax-orange: #FF6B35;
+    --pmax-bg: #0F1419;
+    --pmax-panel: #1A2028;
+    --pmax-panel-2: #232B36;
+    --pmax-border: #2D3744;
+    --pmax-text: #E8ECF1;
+    --pmax-text-dim: #8B95A4;
+    --pmax-success: #10B981;
+    --pmax-warning: #F59E0B;
+    --pmax-danger: #EF4444;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--pmax-bg);
+    color: var(--pmax-text);
+    min-height: 100vh;
+    padding: 24px;
+    background-image:
+      radial-gradient(at 0% 0%, rgba(11, 95, 255, 0.08) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, rgba(255, 107, 53, 0.05) 0px, transparent 50%);
+  }
+
+  .container {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  header {
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, var(--pmax-blue), var(--pmax-orange));
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 18px;
+    color: white;
+  }
+
+  h1 {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+  }
+
+  .tagline {
+    font-size: 13px;
+    color: var(--pmax-text-dim);
+    margin-top: 2px;
+  }
+
+  .badge {
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: var(--pmax-success);
+    padding: 6px 12px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 20px;
+  }
+
+  @media (max-width: 900px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+
+  .panel {
+    background: var(--pmax-panel);
+    border: 1px solid var(--pmax-border);
+    border-radius: 16px;
+    padding: 20px;
+  }
+
+  .panel-title {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--pmax-text-dim);
+    margin-bottom: 16px;
+  }
+
+  /* Upload zone */
+  #dropZone {
+    border: 2px dashed var(--pmax-border);
+    border-radius: 12px;
+    padding: 40px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--pmax-panel-2);
+  }
+
+  #dropZone:hover, #dropZone.drag-over {
+    border-color: var(--pmax-blue);
+    background: rgba(11, 95, 255, 0.05);
+  }
+
+  #dropZone svg {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 12px;
+    color: var(--pmax-blue);
+  }
+
+  #dropZone p {
+    font-size: 14px;
+    color: var(--pmax-text);
+  }
+
+  #dropZone .hint {
+    font-size: 12px;
+    color: var(--pmax-text-dim);
+    margin-top: 6px;
+  }
+
+  /* Form controls */
+  .control-group {
+    margin-bottom: 18px;
+  }
+
+  .control-group:last-child { margin-bottom: 0; }
+
+  .control-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--pmax-text);
+  }
+
+  .control-value {
+    color: var(--pmax-blue);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .size-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .size-input {
+    flex: 1;
+    background: var(--pmax-panel-2);
+    border: 1px solid var(--pmax-border);
+    color: var(--pmax-text);
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    font-variant-numeric: tabular-nums;
+    transition: border-color 0.15s;
+  }
+
+  .size-input:focus {
+    outline: none;
+    border-color: var(--pmax-blue);
+  }
+
+  .lock-btn {
+    background: var(--pmax-panel-2);
+    border: 1px solid var(--pmax-border);
+    color: var(--pmax-text-dim);
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+
+  .lock-btn.locked {
+    background: rgba(11, 95, 255, 0.15);
+    color: var(--pmax-blue);
+    border-color: var(--pmax-blue);
+  }
+
+  .lock-btn svg { width: 18px; height: 18px; }
+
+  select {
+    width: 100%;
+    background: var(--pmax-panel-2);
+    border: 1px solid var(--pmax-border);
+    color: var(--pmax-text);
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    cursor: pointer;
+  }
+
+  select:focus { outline: none; border-color: var(--pmax-blue); }
+
+  input[type="range"] {
+    width: 100%;
+    accent-color: var(--pmax-blue);
+    margin: 4px 0;
+  }
+
+  .btn {
+    width: 100%;
+    background: linear-gradient(135deg, var(--pmax-blue), var(--pmax-blue-dark));
+    color: white;
+    border: none;
+    padding: 14px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.3px;
+  }
+
+  .btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(11, 95, 255, 0.3);
+  }
+
+  .btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .btn-secondary {
+    background: var(--pmax-panel-2);
+    color: var(--pmax-text);
+    border: 1px solid var(--pmax-border);
+  }
+
+  .btn-secondary:hover:not(:disabled) {
+    background: var(--pmax-border);
+    box-shadow: none;
+  }
+
+  /* Preview area */
+  .preview-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  @media (max-width: 700px) {
+    .preview-grid { grid-template-columns: 1fr; }
+  }
+
+  .preview-card {
+    background: var(--pmax-panel-2);
+    border: 1px solid var(--pmax-border);
+    border-radius: 12px;
+    padding: 14px;
+  }
+
+  .preview-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .preview-label {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--pmax-text-dim);
+  }
+
+  .preview-label.after {
+    color: var(--pmax-success);
+  }
+
+  .preview-image-wrap {
+    background: repeating-conic-gradient(#2a3340 0% 25%, #1f2630 0% 50%) 50% / 16px 16px;
+    border-radius: 8px;
+    aspect-ratio: 16/10;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+  }
+
+  .preview-image-wrap img,
+  .preview-image-wrap canvas {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+
+  .preview-placeholder {
+    color: var(--pmax-text-dim);
+    font-size: 13px;
+  }
+
+  .meta-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--pmax-text-dim);
+    padding: 4px 0;
+  }
+
+  .meta-row strong {
+    color: var(--pmax-text);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .saved-badge {
+    display: inline-block;
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--pmax-success);
+    padding: 3px 8px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-left: 6px;
+  }
+
+  .saved-badge.warning { background: rgba(245, 158, 11, 0.15); color: var(--pmax-warning); }
+  .saved-badge.danger { background: rgba(239, 68, 68, 0.15); color: var(--pmax-danger); }
+
+  /* Status / toast */
+  .status {
+    margin-top: 16px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    display: none;
+  }
+
+  .status.show { display: block; }
+
+  .status.info { background: rgba(11, 95, 255, 0.1); color: var(--pmax-blue); border: 1px solid rgba(11, 95, 255, 0.3); }
+  .status.success { background: rgba(16, 185, 129, 0.1); color: var(--pmax-success); border: 1px solid rgba(16, 185, 129, 0.3); }
+  .status.warn { background: rgba(245, 158, 11, 0.1); color: var(--pmax-warning); border: 1px solid rgba(245, 158, 11, 0.3); }
+  .status.error { background: rgba(239, 68, 68, 0.1); color: var(--pmax-danger); border: 1px solid rgba(239, 68, 68, 0.3); }
+
+  /* Progress */
+  .progress {
+    display: none;
+    height: 4px;
+    background: var(--pmax-panel-2);
+    border-radius: 100px;
+    overflow: hidden;
+    margin-top: 12px;
+  }
+
+  .progress.show { display: block; }
+
+  .progress-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--pmax-blue), var(--pmax-orange));
+    transition: width 0.2s;
+  }
+
+  /* Quick presets */
+  .preset-row {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
+
+  .preset-chip {
+    background: var(--pmax-panel-2);
+    border: 1px solid var(--pmax-border);
+    color: var(--pmax-text-dim);
+    padding: 5px 10px;
+    border-radius: 100px;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+
+  .preset-chip:hover {
+    border-color: var(--pmax-blue);
+    color: var(--pmax-blue);
+  }
+
+  .footer-note {
+    margin-top: 24px;
+    text-align: center;
+    font-size: 12px;
+    color: var(--pmax-text-dim);
+  }
+
+  .footer-note code {
+    background: var(--pmax-panel);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 11px;
+    color: var(--pmax-orange);
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="brand">
+      <div class="logo">PP</div>
+      <div>
+        <h1>Pinpoint Image Resizer</h1>
+        <div class="tagline">Lanczos3 · Smart Sharpen · 100% local · No upload</div>
+      </div>
+    </div>
+    <div class="badge">⚡ World-class quality</div>
+  </header>
+
+  <div class="grid">
+
+    <!-- LEFT: Controls -->
+    <div class="panel">
+      <div class="panel-title">⚙️ Settings</div>
+
+      <div class="control-group">
+        <div id="dropZone">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          <p><strong>Drop ảnh vào đây</strong></p>
+          <div class="hint">hoặc click để chọn (JPG, PNG, WebP, AVIF)</div>
+          <input type="file" id="fileInput" accept="image/*" hidden>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <div class="control-label">
+          <span>Kích thước output</span>
+          <span class="control-value" id="ratioLabel">—</span>
+        </div>
+        <div class="size-row">
+          <input type="number" id="widthInput" class="size-input" placeholder="Width" min="1" max="20000">
+          <button id="lockBtn" class="lock-btn locked" title="Khoá tỉ lệ">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+          </button>
+          <input type="number" id="heightInput" class="size-input" placeholder="Height" min="1" max="20000">
+        </div>
+        <div class="preset-row">
+          <button class="preset-chip" data-w="1080" data-h="1080">FB 1080²</button>
+          <button class="preset-chip" data-w="1080" data-h="1920">Story 9:16</button>
+          <button class="preset-chip" data-w="1200" data-h="628">G.Display</button>
+          <button class="preset-chip" data-w="1280" data-h="720">YT 720p</button>
+          <button class="preset-chip" data-w="1920" data-h="1080">FHD</button>
+          <button class="preset-chip" data-scale="0.5">50%</button>
+          <button class="preset-chip" data-scale="0.25">25%</button>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <div class="control-label">Format output</div>
+        <select id="formatSelect">
+          <option value="image/jpeg" selected>JPEG — phổ biến nhất</option>
+          <option value="image/webp">WebP — nhẹ hơn 25-35% (Recommended)</option>
+          <option value="image/avif">AVIF — nhẹ nhất 40-50%</option>
+          <option value="image/png">PNG — lossless, file lớn</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <div class="control-label">
+          <span>Quality</span>
+          <span class="control-value"><span id="qualityVal">92</span>%</span>
+        </div>
+        <input type="range" id="qualityInput" min="1" max="100" value="92">
+      </div>
+
+      <div class="control-group">
+        <div class="control-label">
+          <span>Smart Sharpen</span>
+          <span class="control-value"><span id="sharpenVal">80</span></span>
+        </div>
+        <input type="range" id="sharpenInput" min="0" max="200" value="80">
+      </div>
+
+      <div class="control-group">
+        <button id="resizeBtn" class="btn" disabled>RESIZE NGAY</button>
+      </div>
+      <div class="control-group">
+        <button id="downloadBtn" class="btn btn-secondary" disabled>📥 Download</button>
+      </div>
+
+      <div id="status" class="status"></div>
+      <div id="progress" class="progress"><div class="progress-bar" id="progressBar"></div></div>
+    </div>
+
+    <!-- RIGHT: Preview -->
+    <div class="panel">
+      <div class="panel-title">🖼️ Preview Before / After</div>
+      <div class="preview-grid">
+
+        <div class="preview-card">
+          <div class="preview-card-header">
+            <span class="preview-label">BEFORE</span>
+          </div>
+          <div class="preview-image-wrap" id="beforeWrap">
+            <div class="preview-placeholder">Chưa có ảnh</div>
+          </div>
+          <div class="meta-row"><span>Dimension</span><strong id="beforeDim">—</strong></div>
+          <div class="meta-row"><span>File size</span><strong id="beforeSize">—</strong></div>
+          <div class="meta-row"><span>Type</span><strong id="beforeType">—</strong></div>
+        </div>
+
+        <div class="preview-card">
+          <div class="preview-card-header">
+            <span class="preview-label after">AFTER</span>
+          </div>
+          <div class="preview-image-wrap" id="afterWrap">
+            <div class="preview-placeholder">Sẽ hiển thị sau khi resize</div>
+          </div>
+          <div class="meta-row"><span>Dimension</span><strong id="afterDim">—</strong></div>
+          <div class="meta-row"><span>File size</span><strong id="afterSize">—</strong></div>
+          <div class="meta-row"><span>Compression</span><strong id="afterSaved">—</strong></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-note">
+    Built by Pinpoint · Powered by <code>pica</code> (Lanczos3) + native Canvas encoder · Tất cả xử lý ở local browser — không upload server
+  </div>
+</div>
+
+<script>
+  // ========== STATE ==========
+  const state = {
+    originalFile: null,
+    originalImage: null,    // HTMLImageElement
+    originalBlob: null,
+    originalW: 0,
+    originalH: 0,
+    aspectRatio: 1,
+    outputBlob: null,
+    outputUrl: null,
+    outputExt: 'jpg',
+    pica: null
+  };
+
+  // ========== INIT PICA ==========
+  try {
+    state.pica = window.pica({ features: ['js', 'wasm', 'cib'] });
+  } catch (e) {
+    console.error('Pica init failed', e);
+  }
+
+  // ========== ELEMENT REFS ==========
+  const $ = (id) => document.getElementById(id);
+  const dropZone = $('dropZone');
+  const fileInput = $('fileInput');
+  const widthInput = $('widthInput');
+  const heightInput = $('heightInput');
+  const lockBtn = $('lockBtn');
+  const formatSelect = $('formatSelect');
+  const qualityInput = $('qualityInput');
+  const qualityVal = $('qualityVal');
+  const sharpenInput = $('sharpenInput');
+  const sharpenVal = $('sharpenVal');
+  const resizeBtn = $('resizeBtn');
+  const downloadBtn = $('downloadBtn');
+  const statusEl = $('status');
+  const progressEl = $('progress');
+  const progressBar = $('progressBar');
+  const ratioLabel = $('ratioLabel');
+
+  // ========== UI EVENTS ==========
+  qualityInput.addEventListener('input', e => qualityVal.textContent = e.target.value);
+  sharpenInput.addEventListener('input', e => sharpenVal.textContent = e.target.value);
+
+  lockBtn.addEventListener('click', () => {
+    lockBtn.classList.toggle('locked');
+  });
+
+  dropZone.addEventListener('click', () => fileInput.click());
+  fileInput.addEventListener('change', e => {
+    if (e.target.files[0]) handleFile(e.target.files[0]);
+  });
+
+  dropZone.addEventListener('dragover', e => {
+    e.preventDefault();
+    dropZone.classList.add('drag-over');
+  });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file) handleFile(file);
+  });
+
+  widthInput.addEventListener('input', () => {
+    if (lockBtn.classList.contains('locked') && state.aspectRatio) {
+      const w = parseInt(widthInput.value);
+      if (w > 0) heightInput.value = Math.round(w / state.aspectRatio);
+    }
+  });
+  heightInput.addEventListener('input', () => {
+    if (lockBtn.classList.contains('locked') && state.aspectRatio) {
+      const h = parseInt(heightInput.value);
+      if (h > 0) widthInput.value = Math.round(h * state.aspectRatio);
+    }
+  });
+
+  // Preset chips
+  document.querySelectorAll('.preset-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      if (chip.dataset.w && chip.dataset.h) {
+        widthInput.value = chip.dataset.w;
+        heightInput.value = chip.dataset.h;
+        // Disable lock when user picks fixed preset
+        lockBtn.classList.remove('locked');
+      } else if (chip.dataset.scale && state.originalW) {
+        const s = parseFloat(chip.dataset.scale);
+        widthInput.value = Math.round(state.originalW * s);
+        heightInput.value = Math.round(state.originalH * s);
+      }
+    });
+  });
+
+  resizeBtn.addEventListener('click', doResize);
+  downloadBtn.addEventListener('click', doDownload);
+
+  // ========== HELPERS ==========
+  function showStatus(msg, type='info') {
+    statusEl.textContent = msg;
+    statusEl.className = `status show ${type}`;
+  }
+  function hideStatus() { statusEl.className = 'status'; }
+  function showProgress(p) {
+    progressEl.classList.add('show');
+    progressBar.style.width = (p * 100) + '%';
+  }
+  function hideProgress() {
+    progressEl.classList.remove('show');
+    progressBar.style.width = '0%';
+  }
+  function formatBytes(n) {
+    if (n < 1024) return n + ' B';
+    if (n < 1024 * 1024) return (n / 1024).toFixed(1) + ' KB';
+    return (n / 1024 / 1024).toFixed(2) + ' MB';
+  }
+  function extFromMime(mime) {
+    return { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/avif': 'avif' }[mime] || 'bin';
+  }
+
+  // ========== HANDLE FILE ==========
+  async function handleFile(file) {
+    if (!file.type.startsWith('image/')) {
+      showStatus('File này không phải ảnh.', 'error');
+      return;
+    }
+    hideStatus();
+    state.originalFile = file;
+
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      state.originalImage = img;
+      state.originalW = img.naturalWidth;
+      state.originalH = img.naturalHeight;
+      state.aspectRatio = img.naturalWidth / img.naturalHeight;
+
+      // Fill default size = original
+      widthInput.value = img.naturalWidth;
+      heightInput.value = img.naturalHeight;
+      ratioLabel.textContent = `Ratio ${(state.aspectRatio).toFixed(3)}`;
+
+      // Render before preview
+      const wrap = $('beforeWrap');
+      wrap.innerHTML = '';
+      const preview = document.createElement('img');
+      preview.src = url;
+      wrap.appendChild(preview);
+
+      $('beforeDim').textContent = `${img.naturalWidth} × ${img.naturalHeight}`;
+      $('beforeSize').textContent = formatBytes(file.size);
+      $('beforeType').textContent = file.type.replace('image/', '').toUpperCase();
+
+      // Reset after
+      $('afterWrap').innerHTML = '<div class="preview-placeholder">Sẽ hiển thị sau khi resize</div>';
+      $('afterDim').textContent = '—';
+      $('afterSize').textContent = '—';
+      $('afterSaved').textContent = '—';
+
+      resizeBtn.disabled = false;
+      downloadBtn.disabled = true;
+      state.outputBlob = null;
+    };
+    img.onerror = () => showStatus('Không đọc được ảnh. File có thể bị hỏng.', 'error');
+    img.src = url;
+  }
+
+  // ========== RESIZE ==========
+  async function doResize() {
+    if (!state.originalImage) return;
+    const targetW = parseInt(widthInput.value);
+    const targetH = parseInt(heightInput.value);
+    if (!targetW || !targetH || targetW < 1 || targetH < 1) {
+      showStatus('Width và Height phải > 0', 'error');
+      return;
+    }
+    if (targetW > 20000 || targetH > 20000) {
+      showStatus('Kích thước max 20000px mỗi chiều.', 'error');
+      return;
+    }
+
+    const format = formatSelect.value;
+    const quality = parseInt(qualityInput.value) / 100;
+    const sharpenAmount = parseInt(sharpenInput.value);
+
+    showStatus('Đang resize bằng Lanczos3 + smart sharpen…', 'info');
+    showProgress(0);
+    resizeBtn.disabled = true;
+
+    try {
+      // Create source canvas
+      const srcCanvas = document.createElement('canvas');
+      srcCanvas.width = state.originalW;
+      srcCanvas.height = state.originalH;
+      const srcCtx = srcCanvas.getContext('2d');
+      srcCtx.drawImage(state.originalImage, 0, 0);
+
+      // Destination canvas
+      const dstCanvas = document.createElement('canvas');
+      dstCanvas.width = targetW;
+      dstCanvas.height = targetH;
+
+      // Pica resize options
+      const picaOpts = {
+        quality: 3, // Highest = Lanczos3
+        alpha: format === 'image/png' || format === 'image/webp' || format === 'image/avif',
+        unsharpAmount: sharpenAmount,
+        unsharpRadius: 0.6,
+        unsharpThreshold: 1
+      };
+
+      await state.pica.resize(srcCanvas, dstCanvas, picaOpts);
+      showProgress(0.6);
+
+      // Encode to target format
+      let blob;
+      try {
+        blob = await new Promise((resolve, reject) => {
+          dstCanvas.toBlob(b => {
+            if (b) resolve(b);
+            else reject(new Error('encode-failed'));
+          }, format, quality);
+        });
+      } catch (encodeErr) {
+        // Fallback for AVIF (some browsers don't support encoding)
+        if (format === 'image/avif') {
+          showStatus('Browser này chưa hỗ trợ encode AVIF → fallback WebP.', 'warn');
+          blob = await new Promise((resolve, reject) => {
+            dstCanvas.toBlob(b => b ? resolve(b) : reject(new Error('encode-failed')), 'image/webp', quality);
+          });
+          state.outputExt = 'webp';
+        } else {
+          throw encodeErr;
+        }
+      }
+
+      if (!blob) throw new Error('Encode returned null. Browser có thể chưa support format này.');
+
+      // Check actual MIME of the returned blob
+      const actualMime = blob.type;
+      if (format === 'image/avif' && actualMime !== 'image/avif') {
+        showStatus(`Browser này không encode AVIF được → fallback ${actualMime.replace('image/', '').toUpperCase()}.`, 'warn');
+        state.outputExt = extFromMime(actualMime);
+      } else {
+        state.outputExt = extFromMime(format);
+      }
+
+      showProgress(0.9);
+
+      state.outputBlob = blob;
+      if (state.outputUrl) URL.revokeObjectURL(state.outputUrl);
+      state.outputUrl = URL.createObjectURL(blob);
+
+      // Render after preview
+      const afterWrap = $('afterWrap');
+      afterWrap.innerHTML = '';
+      const afterImg = document.createElement('img');
+      afterImg.src = state.outputUrl;
+      afterWrap.appendChild(afterImg);
+
+      $('afterDim').textContent = `${targetW} × ${targetH}`;
+      $('afterSize').textContent = formatBytes(blob.size);
+
+      // Compute compression ratio
+      const ratio = blob.size / state.originalFile.size;
+      const savedPct = ((1 - ratio) * 100).toFixed(1);
+      let badgeClass = '';
+      let label = '';
+      if (ratio < 1) {
+        label = `<span class="saved-badge">↓ ${savedPct}% nhẹ hơn</span>`;
+      } else {
+        const upPct = ((ratio - 1) * 100).toFixed(1);
+        badgeClass = 'warning';
+        label = `<span class="saved-badge warning">↑ ${upPct}% nặng hơn</span>`;
+      }
+      $('afterSaved').innerHTML = label;
+
+      showProgress(1);
+      setTimeout(hideProgress, 600);
+      showStatus(`✓ Hoàn thành — ${formatBytes(blob.size)} (${targetW}×${targetH})`, 'success');
+      downloadBtn.disabled = false;
+      resizeBtn.disabled = false;
+
+    } catch (err) {
+      console.error(err);
+      showStatus(`Lỗi: ${err.message}`, 'error');
+      hideProgress();
+      resizeBtn.disabled = false;
+    }
+  }
+
+  // ========== DOWNLOAD ==========
+  function doDownload() {
+    if (!state.outputBlob || !state.outputUrl) return;
+    const baseName = (state.originalFile.name || 'image').replace(/\.[^.]+$/, '');
+    const targetW = widthInput.value;
+    const filename = `${baseName}_${targetW}w.${state.outputExt}`;
+    const a = document.createElement('a');
+    a.href = state.outputUrl;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+
+  // Initial state
+  showStatus('💡 Tip: WebP nhẹ hơn JPG 25-35% mà chất lượng tương đương — recommend dùng cho web/ads.', 'info');
+</script>
+</body>
+</html>
